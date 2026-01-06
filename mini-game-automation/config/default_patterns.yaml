@@ -1,0 +1,49 @@
+# Default Pattern Configuration
+# Pattern format: [last 3 rounds]-[decision]
+# B = Red team, P = Blue team
+# Multiple patterns separated by semicolons
+
+# Default patterns for new tables
+default_patterns: "BBP-P;BPB-B;BBB-P;PPP-B;PBP-B;BPB-P"
+
+# Pattern validation regex
+pattern_regex: "^[BP]{3}-[BP](;[BP]{3}-[BP])*$"
+
+# Screenshot frequency settings (in milliseconds)
+screenshot:
+  # Frequency when timer > 6 (clickable phase)
+  normal_interval_ms: 200
+  # Frequency when timer <= 6 (countdown phase)  
+  fast_interval_ms: 100
+  # Frequency when all tables in result phase (timer = 0)
+  slow_interval_ms: 1000
+
+# Timer settings
+timer:
+  # Minimum timer value for clicking (exclusive)
+  click_threshold: 6
+  # Timer reset detection threshold
+  reset_threshold: 10
+
+# Learning phase settings
+learning_phase:
+  # Number of rounds to watch before making decisions
+  rounds_required: 3
+
+# Error handling settings
+error_handling:
+  # Maximum retry attempts
+  max_retries: 3
+  # Retry delays in seconds (exponential backoff)
+  retry_delays: [1, 2, 4]
+  # OCR fallback threshold (consecutive template failures)
+  ocr_fallback_threshold: 3
+  # Stuck state detection threshold (consecutive timeouts)
+  stuck_threshold: 3
+
+# Resource monitoring settings
+resource_monitoring:
+  # CPU usage threshold for auto-throttling (percentage)
+  cpu_throttle_threshold: 80
+  # UI update interval (milliseconds)
+  ui_update_interval_ms: 500

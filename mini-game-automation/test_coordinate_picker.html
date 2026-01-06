@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinate Picker Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-box {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-box h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .test-region {
+            background: #f0f0f0;
+            border: 2px dashed #999;
+            padding: 40px;
+            margin: 20px 0;
+            text-align: center;
+            border-radius: 4px;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🎯 Coordinate Picker Test Page</h1>
+        <p>This page is designed to test the coordinate picker functionality.</p>
+        
+        <div class="instructions">
+            <h3>How to Test:</h3>
+            <ol>
+                <li>Click "📐 Pick Table Region" in the configuration window</li>
+                <li>A green overlay should appear on this page</li>
+                <li>Drag to select a region (like the boxes below)</li>
+                <li>Release mouse to capture coordinates</li>
+            </ol>
+        </div>
+
+        <h2>Test Regions (Try selecting these):</h2>
+        
+        <div class="test-region" id="region1">
+            <h3>Region 1 - Table Area</h3>
+            <p>This simulates a table region. Try selecting this entire box.</p>
+            <p>Coordinates will be relative to the page.</p>
+        </div>
+
+        <div class="test-region" id="region2">
+            <h3>Region 2 - Another Table</h3>
+            <p>This is another test region. Select this box to test multiple regions.</p>
+        </div>
+
+        <div class="test-region" id="region3">
+            <h3>Region 3 - Timer/Score Area</h3>
+            <p>This simulates a timer or score display area.</p>
+        </div>
+
+        <h2>Test Buttons (For button picker):</h2>
+        <button class="test-button" id="btn1">🔵 Blue Button</button>
+        <button class="test-button" id="btn2" style="background: #f44336;">🔴 Red Button</button>
+        <button class="test-button" id="btn3" style="background: #2196F3;">⚪ White Button</button>
+
+        <div class="instructions" style="margin-top: 40px;">
+            <h3>📝 Notes:</h3>
+            <ul>
+                <li>This page works without a canvas element (#layaCanvas)</li>
+                <li>Coordinates will be relative to the page (0,0 at top-left)</li>
+                <li>Press ESC to cancel the picker</li>
+                <li>Check the configuration window for captured coordinates</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

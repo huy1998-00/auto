@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Coordinate Picker Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-box {
+            width: 200px;
+            height: 150px;
+            margin: 20px;
+            padding: 20px;
+            border: 2px solid #333;
+            background: #f0f0f0;
+        }
+        #test-table {
+            width: 400px;
+            height: 300px;
+            background: #e0e0e0;
+            border: 3px solid #666;
+            margin: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Coordinate Picker Test Page</h1>
+    <p>This page tests the coordinate picker overlay.</p>
+    <div id="test-table">Drag here to select this region</div>
+    <div class="test-box">Test Box 1</div>
+    <div class="test-box">Test Box 2</div>
+    
+    <button onclick="testPicker()" style="padding: 10px 20px; font-size: 16px; margin: 20px;">
+        Test Coordinate Picker
+    </button>
+    
+    <div id="result" style="margin: 20px; padding: 10px; background: #fff; border: 1px solid #ccc;">
+        Result will appear here...
+    </div>
+
+    <script>
+        // Copy the picker script here for testing
+        const PICKER_SCRIPT = `
+        (function() {
+            if (window.__coordinatePicker) {
+                window.__coordinatePicker.destroy();
+            }
+
+            const picker = {
+                mode: 'table',
+                isActive: false,
+                startX: 0,
+                startY: 0,
+                currentRect: null,
+                overlay: null,
+                result: null,
+
+                init() {
+                    if (!document.body) {
+                        console.error('Document body not found');
+                        throw new Error('Document body not found');
+                    }
+                    
+                    console.log('Initializing coordinate picker...');
+                    
+                    // Create overlay - BRIGHT GREEN TINT
+                    this.overlay = document.createElement('div');
+                    this.overlay.id = '__coordinatePickerOverlay';
+                    this.overlay.style.cssText = \`
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        z-index: 999999 !important;
+                        pointer-events: auto !important;
+                        cursor: crosshair !important;
+                        background: rgba(0, 255, 0, 0.15) !important;
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    \`;
+                    document.body.appendChild(this.overlay);
+                    console.log('✓ Overlay created');
+
+                    // Create instruction panel
+                    const panel = document.createElement('div');
+                    panel.id = '__coordinatePickerPanel';
+                    panel.style.cssText = \`
+                        position: fixed;
+                        top: 20px;
+                        left: 20px;
+                        background: white;
+                        padding: 15px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        z-index: 1000000;
+                        font-family: Arial, sans-serif;
+                        font-size: 14px;
+                        max-width: 300px;
+                    \`;
+                    panel.innerHTML = \`
+                        <div style="font-weight: bold; margin-bottom: 10px;">
+                            📍 Coordinate Picker
+                        </div>
+                        <div>Drag to select TABLE region</div>
+                        <div style="font-size: 12px; color: #999; margin-top: 10px;">
+                            • Drag to select area<br>
+                            • ESC to cancel
+                        </div>
+                    \`;
+                    document.body.appendChild(panel);
+
+                    // Create selection rectangle - BRIGHT GREEN
+                    this.currentRect = document.createElement('div');
+                    this.currentRect.id = '__coordinatePickerRect';
+                    this.currentRect.style.cssText = \`
+                        position: fixed !important;
+                        border: 3px solid #00ff00 !important;
+                        background: rgba(0, 255, 0, 0.2) !important;
+                        pointer-events: none !important;
+                        z-index: 1000000 !important;
+                        display: none !important;
+                        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5) !important;
+                    \`;
+                    document.body.appendChild(this.currentRect);
+                    console.log('✓ Selection rectangle created');
+
+                    // Event listeners
+                    this.overlay.addEventListener('mousedown', (e) => this.onMouseDown(e));
+                    this.overlay.addEventListener('mousemove', (e) => this.onMouseMove(e));
+                    this.overlay.addEventListener('mouseup', (e) => this.onMouseUp(e));
+
+                    // ESC handler
+                    const escHandler = (e) => {
+                        if (e.key === 'Escape') {
+                            this.cancel();
+                        }
+                    };
+                    document.addEventListener('keydown', escHandler);
+                    this.escHandler = escHandler;
+                },
+
+                getCanvasOffset() {
+                    return { x: 0, y: 0 };
+                },
+
+                onMouseDown(e) {
+                    console.log('Mouse down');
+                    this.isActive = true;
+                    const canvasOffset = this.getCanvasOffset();
+                    this.startX = e.clientX - canvasOffset.x;
+                    this.startY = e.clientY - canvasOffset.y;
+                    
+                    this.currentRect.style.display = 'block';
+                    this.currentRect.style.visibility = 'visible';
+                    this.currentRect.style.opacity = '1';
+                    this.currentRect.style.left = e.clientX + 'px';
+                    this.currentRect.style.top = e.clientY + 'px';
+                    this.currentRect.style.width = '0px';
+                    this.currentRect.style.height = '0px';
+                    console.log('Green rectangle visible');
+                },
+
+                onMouseMove(e) {
+                    if (!this.isActive) return;
+
+                    const canvasOffset = this.getCanvasOffset();
+                    const currentX = e.clientX - canvasOffset.x;
+                    const currentY = e.clientY - canvasOffset.y;
+
+                    const left = Math.min(this.startX, currentX);
+                    const top = Math.min(this.startY, currentY);
+                    const width = Math.abs(currentX - this.startX);
+                    const height = Math.abs(currentY - this.startY);
+
+                    const screenX = e.clientX;
+                    const screenY = e.clientY;
+                    const screenLeft = Math.min(screenX, this.startX + canvasOffset.x);
+                    const screenTop = Math.min(screenY, this.startY + canvasOffset.y);
+                    const screenWidth = Math.abs(screenX - (this.startX + canvasOffset.x));
+                    const screenHeight = Math.abs(screenY - (this.startY + canvasOffset.y));
+
+                    this.currentRect.style.left = screenLeft + 'px';
+                    this.currentRect.style.top = screenTop + 'px';
+                    this.currentRect.style.width = screenWidth + 'px';
+                    this.currentRect.style.height = screenHeight + 'px';
+                },
+
+                onMouseUp(e) {
+                    if (!this.isActive) return;
+
+                    const canvasOffset = this.getCanvasOffset();
+                    const endX = e.clientX - canvasOffset.x;
+                    const endY = e.clientY - canvasOffset.y;
+
+                    const x = Math.min(this.startX, endX);
+                    const y = Math.min(this.startY, endY);
+                    const width = Math.abs(endX - this.startX);
+                    const height = Math.abs(endY - this.startY);
+
+                    if (width > 10 && height > 10) {
+                        this.captureRegion(x, y, width, height);
+                    }
+
+                    this.isActive = false;
+                    this.currentRect.style.display = 'none';
+                },
+
+                captureRegion(x, y, width, height) {
+                    this.result = { x, y, width, height };
+                    document.getElementById('result').innerHTML = \`
+                        <strong>Captured:</strong><br>
+                        x: \${x}<br>
+                        y: \${y}<br>
+                        width: \${width}<br>
+                        height: \${height}
+                    \`;
+                    this.destroy();
+                },
+
+                cancel() {
+                    this.result = null;
+                    document.getElementById('result').innerHTML = 'Cancelled';
+                    this.destroy();
+                },
+
+                destroy() {
+                    if (this.overlay) {
+                        this.overlay.remove();
+                        this.overlay = null;
+                    }
+                    const panel = document.getElementById('__coordinatePickerPanel');
+                    if (panel) panel.remove();
+                    if (this.currentRect) {
+                        this.currentRect.remove();
+                        this.currentRect = null;
+                    }
+                    if (this.escHandler) {
+                        document.removeEventListener('keydown', this.escHandler);
+                        this.escHandler = null;
+                    }
+                    this.isActive = false;
+                }
+            };
+
+            window.__coordinatePicker = picker;
+            picker.init();
+            return 'Picker initialized';
+        })();
+        `;
+
+        function testPicker() {
+            try {
+                const result = eval(PICKER_SCRIPT);
+                console.log('Picker result:', result);
+                document.getElementById('result').innerHTML = 'Picker initialized! Look for green overlay.';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

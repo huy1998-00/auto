@@ -1,0 +1,216 @@
+# Table Region Configuration
+# Define coordinates (x, y, width, height) for each table region on the canvas
+# Coordinates are relative to the canvas element (#layaCanvas)
+
+# Maximum 6 tables supported
+tables:
+  1:
+    x: 0
+    y: 0
+    width: 640
+    height: 360
+    # Button coordinates relative to table region
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    # Timer region within table
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    # Score regions within table
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+  2:
+    x: 640
+    y: 0
+    width: 640
+    height: 360
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+  3:
+    x: 1280
+    y: 0
+    width: 640
+    height: 360
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+  4:
+    x: 0
+    y: 360
+    width: 640
+    height: 360
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+  5:
+    x: 640
+    y: 360
+    width: 640
+    height: 360
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+  6:
+    x: 1280
+    y: 360
+    width: 640
+    height: 360
+    buttons:
+      blue:
+        x: 150
+        y: 280
+      red:
+        x: 490
+        y: 280
+      confirm:
+        x: 320
+        y: 320
+      cancel:
+        x: 320
+        y: 350
+    timer:
+      x: 290
+      y: 50
+      width: 60
+      height: 40
+    blue_score:
+      x: 100
+      y: 100
+      width: 80
+      height: 40
+    red_score:
+      x: 460
+      y: 100
+      width: 80
+      height: 40
+
+# Canvas transform offset (applied to all click coordinates)
+canvas_transform_offset_x: 17
+canvas_transform_offset_y: 0

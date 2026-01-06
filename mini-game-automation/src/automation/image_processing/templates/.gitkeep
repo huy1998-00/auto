@@ -1,0 +1,4 @@
+# Number templates directory
+# Place PNG templates for digits 0-9 here
+# Files should be named: 0.png, 1.png, 2.png, ... 9.png
+# Templates should be grayscale images of the digit as it appears in the game
