@@ -38,7 +38,7 @@ class CoordinatePicker:
             startY: 0,
             currentRect: null,
             overlay: null,
-            result: null,
+            result: undefined,  // Initialize to undefined so waitForResult() doesn't resolve immediately
             resolveFunc: null,
 
             init() {
@@ -332,15 +332,15 @@ class CoordinatePicker:
     })();
     """
 
-    def __init__(self, page: Page):
+    def __init__(self, page: Page) -> None:
         """
         Initialize coordinate picker.
 
         Args:
-            page: Playwright Page instance
+            page: Playwright Page instance to inject the picker overlay into
         """
-        self.page = page
-        self.is_active = False
+        self.page: Page = page
+        self.is_active: bool = False
 
     async def pick_table_region(self) -> Optional[Dict[str, int]]:
         """
@@ -349,7 +349,14 @@ class CoordinatePicker:
         Returns:
             Dictionary with x, y, width, height or None if cancelled
         """
-        return await self._pick('table')
+        logger.info("Starting table region picker")
+        try:
+            result = await self._pick('table')
+            logger.info(f"Table region picker completed: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"Exception in pick_table_region(): {e}", exc_info=True)
+            raise
 
     async def pick_button_position(self) -> Optional[Dict[str, int]]:
         """
@@ -377,31 +384,41 @@ class CoordinatePicker:
 
         Returns:
             Captured coordinates dictionary or None if cancelled
+            
+        Raises:
+            Exception: If page is not ready or picker initialization fails
         """
+        logger.info(f"Starting coordinate picker in mode: {mode}")
+        
         if self.is_active:
+            logger.warning("Picker already active, stopping previous instance")
             await self.stop_picking()
 
         self.is_active = True
 
         try:
             # Ensure page is loaded
+            logger.debug("Waiting for page to be ready")
             await self.page.wait_for_load_state("domcontentloaded", timeout=5000)
             
             # Check if document.body exists
             body_exists = await self.page.evaluate("document.body !== null")
             if not body_exists:
-                logger.error("Page body not found - cannot inject picker")
-                raise Exception("Page body not found. Please ensure the page is fully loaded.")
+                error_msg = "Page body not found. Please ensure the page is fully loaded."
+                logger.error(error_msg)
+                raise Exception(error_msg)
 
             # Inject picker script
+            logger.debug("Injecting coordinate picker script")
             init_result = await self.page.evaluate(self.PICKER_SCRIPT)
             logger.info(f"Picker script injected: {init_result}")
 
             # Verify picker was created
             picker_exists = await self.page.evaluate("window.__coordinatePicker !== undefined")
             if not picker_exists:
-                logger.error("Picker was not created after injection")
-                raise Exception("Failed to initialize coordinate picker. Please refresh the page and try again.")
+                error_msg = "Failed to initialize coordinate picker. Please refresh the page and try again."
+                logger.error(error_msg)
+                raise Exception(error_msg)
             
             # Verify overlay is visible
             overlay_visible = await self.page.evaluate("""
@@ -417,7 +434,7 @@ class CoordinatePicker:
             """)
             
             if not overlay_visible:
-                logger.error("Overlay is not visible after creation")
+                logger.warning("Overlay is not visible after creation, attempting to force visibility")
                 # Try to force it visible
                 await self.page.evaluate("""
                     () => {
@@ -430,15 +447,16 @@ class CoordinatePicker:
                         }
                     }
                 """)
-                logger.info("Attempted to force overlay visibility")
+                logger.info("Overlay visibility forced")
             
-            logger.info(f"Overlay visibility check: {overlay_visible}")
+            logger.debug(f"Overlay visibility check: {overlay_visible}")
 
             # Set mode
             await self.page.evaluate(f"window.__coordinatePicker.setMode('{mode}')")
             logger.info(f"Picker mode set to: {mode}")
 
             # Wait for result (with timeout)
+            logger.debug("Waiting for user to select coordinates")
             result = await asyncio.wait_for(
                 self.page.evaluate("""async () => {
                     return await window.__coordinatePicker.waitForResult();
@@ -446,22 +464,28 @@ class CoordinatePicker:
                 timeout=60.0  # 60 second timeout
             )
 
-            logger.info(f"Picker result: {result}")
+            logger.info(f"Coordinate picker completed with result: {result}")
             return result
 
         except asyncio.TimeoutError:
-            logger.warning("Coordinate picking timed out")
+            logger.warning("Coordinate picking timed out after 60 seconds")
             await self.stop_picking()
             return None
         except Exception as e:
-            logger.error(f"Error during coordinate picking: {e}")
+            logger.error(f"Error during coordinate picking: {e}", exc_info=True)
             await self.stop_picking()
             return None
         finally:
             self.is_active = False
+            logger.debug("Coordinate picker deactivated")
 
-    async def stop_picking(self):
-        """Stop picking and clean up."""
+    async def stop_picking(self) -> None:
+        """
+        Stop picking and clean up overlay.
+        
+        Removes the coordinate picker overlay from the page and resets
+        the active state. Safe to call even if picker is not active.
+        """
         if not self.is_active:
             return
 
@@ -471,7 +495,8 @@ class CoordinatePicker:
                     window.__coordinatePicker.destroy();
                 }
             """)
+            logger.debug("Coordinate picker stopped and cleaned up")
         except Exception as e:
-            logger.error(f"Error stopping picker: {e}")
+            logger.error(f"Error stopping picker: {e}", exc_info=True)
 
         self.is_active = False

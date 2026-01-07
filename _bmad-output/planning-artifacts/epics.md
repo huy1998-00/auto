@@ -1173,17 +1173,17 @@ So that I can add valid keys and delete keys if payment is not received.
 **Stories:**
 - ✅ Story 1.1: Browser Automation Setup and Region Screenshot Capture
 - ✅ Story 1.2: Table Region Configuration and Coordinate Management
-- ✅ Story 1.3: Timer Extraction Using OpenCV Template Matching
-- ✅ Story 1.4: Score Extraction Using OpenCV Template Matching
-- ✅ Story 1.5: Round History Tracking and State Management
-- ✅ Story 1.6: Learning Phase Implementation
-- ✅ Story 1.7: Pattern Matching Algorithm Implementation
-- ✅ Story 1.8: Click Decision Logic
-- ✅ Story 1.9: Timer-Based Click Validation
-- ✅ Story 1.10: Two-Phase Click Execution with Canvas Transform Offset
-- ✅ Story 1.11: New Round Detection
-- ✅ Story 1.12: Winner Detection
-- ✅ Story 1.13: Adaptive Screenshot Frequency
+- 🧪 Story 1.3: Timer Extraction Using OpenCV Template Matching
+- 🧪 Story 1.4: Score Extraction Using OpenCV Template Matching
+- 🧪 Story 1.5: Round History Tracking and State Management
+- 🧪 Story 1.6: Learning Phase Implementation
+- 🧪 Story 1.7: Pattern Matching Algorithm Implementation
+- 🧪 Story 1.8: Click Decision Logic
+- 🧪 Story 1.9: Timer-Based Click Validation
+- 🧪 Story 1.10: Two-Phase Click Execution with Canvas Transform Offset
+- 🧪 Story 1.11: New Round Detection
+- 🧪 Story 1.12: Winner Detection
+- 🧪 Story 1.13: Adaptive Screenshot Frequency
 
 **Notes:** All core automation features implemented. Code written but functions not yet tested/verified.
 
@@ -1194,9 +1194,9 @@ So that I can add valid keys and delete keys if payment is not received.
 **Status:** ✅ All stories implemented, 🧪 **NOT YET TESTED**
 
 **Stories:**
-- ✅ Story 2.1: Multi-Table Manager Implementation
-- ✅ Story 2.2: Multi-Table Processing with Region Screenshots
-- ✅ Story 2.3: Thread-Safe JSON File Writing
+- 🧪 Story 2.1: Multi-Table Manager Implementation
+- 🧪 Story 2.2: Multi-Table Processing with Region Screenshots
+- 🧪 Story 2.3: Thread-Safe JSON File Writing
 
 **Notes:** Parallel processing code implemented. Functions not yet tested/verified.
 
@@ -1207,11 +1207,11 @@ So that I can add valid keys and delete keys if payment is not received.
 **Status:** ✅ All stories implemented, 🧪 **NOT YET TESTED**
 
 **Stories:**
-- ✅ Story 3.1: Date-Based Session Folder Creation
-- ✅ Story 3.2: Per-Table JSON File Structure
-- ✅ Story 3.3: Session Config JSON Creation
-- ✅ Story 3.4: In-Memory Cache System
-- ✅ Story 3.5: Continuous Writing Until Tool Closes
+- 🧪 Story 3.1: Date-Based Session Folder Creation
+- 🧪 Story 3.2: Per-Table JSON File Structure
+- 🧪 Story 3.3: Session Config JSON Creation
+- 🧪 Story 3.4: In-Memory Cache System
+- 🧪 Story 3.5: Continuous Writing Until Tool Closes
 
 **Notes:** Data persistence code implemented. Functions not yet tested/verified.
 
@@ -1224,26 +1224,14 @@ So that I can add valid keys and delete keys if payment is not received.
 **Stories:**
 - ✅ Story 4.1: Desktop UI Framework Setup - **Setup complete, may need future changes**
 - ✅ Story 4.2: Real-Time Table Status Display
-- ✅ Story 4.3: Pattern Editor UI with Validation
-- ✅ Story 4.4: History Viewer with Success/Failure Indicators
-- ✅ Story 4.5: Global Start/Stop Controls
-- ✅ Story 4.6: Individual Table Pause/Resume Controls
-- ✅ Story 4.7: Scoreboard Monitoring and Target Score Stop
-- ✅ Story 4.8: Resource Monitoring Display
+- 🧪 Story 4.3: Pattern Editor UI with Validation
+- 🧪 Story 4.4: History Viewer with Success/Failure Indicators
+- 🧪 Story 4.5: Global Start/Stop Controls
+- 🧪 Story 4.6: Individual Table Pause/Resume Controls
+- 🧪 Story 4.7: Scoreboard Monitoring and Target Score Stop
+- 🧪 Story 4.8: Resource Monitoring Display
 - ⚠️ **Story 4.9: Visual Coordinate Picker** - **ISSUE: Overlay not appearing**
 
-**Known Issues:**
-1. **Coordinate Picker Overlay Not Visible** 🔴
-   - Green overlay not appearing when picker is activated
-   - JavaScript injection working but overlay CSS not rendering
-   - Attempted fixes: Changed to green tint, added !important flags, enhanced verification
-   - **Status:** Still debugging - overlay creation verified but not visible to user
-
-2. **Test Coordinate Picker Not Working** 🔴
-   - Standalone test HTML file not functioning
-   - Needs JavaScript debugging
-
-**Notes:** UI framework setup complete. All UI features implemented but not tested. Coordinate picker has visibility issue that blocks table configuration workflow.
 
 ---
 
@@ -1252,11 +1240,11 @@ So that I can add valid keys and delete keys if payment is not received.
 **Status:** ✅ All stories implemented, 🧪 **NOT YET TESTED**
 
 **Stories:**
-- ✅ Story 5.1: Page Refresh Detection and Auto-Resume
-- ✅ Story 5.2: Retry Logic with Exponential Backoff
-- ✅ Story 5.3: Template Matching Fallback to OCR
-- ✅ Story 5.4: Browser Window Locking and Canvas Validation
-- ✅ Story 5.5: Stuck State Detection and Automatic Pausing
+- 🧪 Story 5.1: Page Refresh Detection and Auto-Resume
+- 🧪 Story 5.2: Retry Logic with Exponential Backoff
+- 🧪 Story 5.3: Template Matching Fallback to OCR
+- 🧪 Story 5.4: Browser Window Locking and Canvas Validation
+- 🧪 Story 5.5: Stuck State Detection and Automatic Pausing
 
 **Notes:** Error recovery code implemented. Functions not yet tested/verified.
 
@@ -1290,10 +1278,9 @@ So that I can add valid keys and delete keys if payment is not received.
 3. Comprehensive testing not yet performed
 
 **Next Actions:**
-1. 🔴 Fix coordinate picker overlay CSS/JavaScript injection
-2. 🔴 Debug test coordinate picker HTML file
+
 3. 🧪 Begin comprehensive testing of Epics 1-5
-4. ✅ Complete Epic 4 (coordinate picker fixes)
+4. ✅ Complete Epic 1.1 and 1.2 (coordinate picker fixes)
 5. ⏳ Begin Epic 6 (Phase 4 - Licensing)
 
 **Testing Priority:**

@@ -1,46 +1,37 @@
-# Table Region Configuration
-# Define coordinates (x, y, width, height) for each table region on the canvas
-# Coordinates are relative to the canvas element (#layaCanvas)
-
-# Maximum 6 tables supported
 tables:
   1:
-    x: 0
-    y: 0
-    width: 640
-    height: 360
-    # Button coordinates relative to table region
+    x: 62
+    y: 415
+    width: 1783
+    height: 212
     buttons:
       blue:
-        x: 150
-        y: 280
+        x: 164
+        y: 764
       red:
-        x: 490
-        y: 280
+        x: 345
+        y: 762
       confirm:
-        x: 320
-        y: 320
+        x: 482
+        y: 749
       cancel:
-        x: 320
-        y: 350
-    # Timer region within table
+        x: 604
+        y: 755
     timer:
-      x: 290
-      y: 50
-      width: 60
-      height: 40
-    # Score regions within table
+      x: 698
+      y: 709
+      width: 134
+      height: 84
     blue_score:
-      x: 100
-      y: 100
-      width: 80
-      height: 40
+      x: 678
+      y: 725
+      width: 52
+      height: 77
     red_score:
-      x: 460
-      y: 100
-      width: 80
-      height: 40
-
+      x: 843
+      y: 704
+      width: 136
+      height: 87
   2:
     x: 640
     y: 0
@@ -74,7 +65,6 @@ tables:
       y: 100
       width: 80
       height: 40
-
   3:
     x: 1280
     y: 0
@@ -108,7 +98,6 @@ tables:
       y: 100
       width: 80
       height: 40
-
   4:
     x: 0
     y: 360
@@ -142,7 +131,6 @@ tables:
       y: 100
       width: 80
       height: 40
-
   5:
     x: 640
     y: 360
@@ -176,7 +164,6 @@ tables:
       y: 100
       width: 80
       height: 40
-
   6:
     x: 1280
     y: 360
@@ -210,7 +197,5 @@ tables:
       y: 100
       width: 80
       height: 40
-
-# Canvas transform offset (applied to all click coordinates)
 canvas_transform_offset_x: 17
 canvas_transform_offset_y: 0

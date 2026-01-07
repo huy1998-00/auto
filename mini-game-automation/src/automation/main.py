@@ -86,9 +86,10 @@ class AutomationApp:
         self.resource_monitor: Optional[ResourceMonitor] = None
 
         # State
-        self._is_running = False
+        self._is_running: bool = False
         self.ui_window: Optional[MainWindow] = None
         self._ui_thread: Optional[threading.Thread] = None
+        self.browser_event_loop: Optional[asyncio.AbstractEventLoop] = None
 
     def load_config(self) -> bool:
         """
@@ -338,6 +339,12 @@ class AutomationApp:
             # Add method to get browser page for coordinate picker
             self.ui_window.get_browser_page = lambda: self.browser_manager.page if self.browser_manager else None
             
+            # Add method to get browser event loop for coordinate picker
+            # Use a function that reads the current value, not a lambda that captures it
+            def get_event_loop():
+                return self.browser_event_loop
+            self.ui_window.get_browser_event_loop = get_event_loop
+            
             # Start UI update loop
             self._schedule_ui_updates()
             
@@ -355,8 +362,17 @@ class AutomationApp:
             self.update_ui_status()
             self.ui_window.root.after(500, self._schedule_ui_updates)
 
-    def _on_ui_open_browser(self, game_url: Optional[str]):
-        """Handle UI open browser button click."""
+    def _on_ui_open_browser(self, game_url: Optional[str]) -> None:
+        """
+        Handle UI open browser button click.
+        
+        Opens the browser in a background thread and maintains the event loop
+        so that Playwright Page objects can be used from other threads via
+        run_coroutine_threadsafe.
+        
+        Args:
+            game_url: Optional URL to navigate to. If None, opens test page.
+        """
         self.game_url = game_url
         
         # Save Game URL to .env file automatically if provided
@@ -364,15 +380,46 @@ class AutomationApp:
             EnvManager.save_game_url(game_url)
         
         # Open browser in background thread
-        def open_thread():
+        def open_thread() -> None:
+            """
+            Thread function that creates and maintains the browser event loop.
+            
+            This loop must stay alive for the lifetime of the browser session
+            to allow Playwright Page objects to be used from other threads.
+            """
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            
+            # Store the loop reference for coordinate picker
+            # This allows other threads to schedule coroutines using run_coroutine_threadsafe
+            self.browser_event_loop = loop
+            logger.info(f"Browser event loop stored: {loop}")
+            
             try:
+                # Run browser initialization
                 loop.run_until_complete(self._open_browser_only())
+                
+                # Keep loop running so we can schedule coroutines to it later
+                # Create a background task that keeps the loop alive
+                async def keepalive() -> None:
+                    """Background task to keep event loop running."""
+                    while True:
+                        await asyncio.sleep(1)
+                
+                loop.create_task(keepalive())
+                
+                # Run loop forever (until thread is killed)
+                # This is necessary because Playwright Page objects are bound
+                # to their original event loop and cannot be used in a different one
+                loop.run_forever()
             except Exception as e:
-                logger.error(f"Failed to open browser: {e}")
+                logger.error(f"Failed to open browser: {e}", exc_info=True)
                 if self.ui_window:
                     self.ui_window.root.after(0, lambda: self.ui_window._on_browser_error(str(e)))
+            finally:
+                logger.info("Closing browser event loop")
+                loop.close()
+                self.browser_event_loop = None
         
         threading.Thread(target=open_thread, daemon=True).start()
 

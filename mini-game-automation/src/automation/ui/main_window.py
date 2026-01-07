@@ -573,12 +573,18 @@ Patterns are matched in order (first match wins).
         browser_page = None
         if hasattr(self, 'get_browser_page'):
             browser_page = self.get_browser_page()
+        
+        # Get browser event loop accessor from main app
+        get_browser_event_loop = None
+        if hasattr(self, 'get_browser_event_loop'):
+            get_browser_event_loop = self.get_browser_event_loop
 
         TableConfigWindow(
             self.root,
             self.on_coordinates_update,
             self.browser_opened,
-            browser_page
+            browser_page,
+            get_browser_event_loop=get_browser_event_loop
         )
 
     def _pause_table(self, table_id: int):
@@ -684,6 +690,7 @@ class TableConfigWindow:
         on_save: Optional[Callable] = None,
         browser_opened: bool = False,
         browser_page=None,
+        get_browser_event_loop: Optional[Callable] = None,
     ):
         """
         Initialize table configuration window.
@@ -693,6 +700,7 @@ class TableConfigWindow:
             on_save: Callback when coordinates are saved (table_id, coords_dict)
             browser_opened: Whether browser is already opened
             browser_page: Playwright Page instance for coordinate picking
+            get_browser_event_loop: Function to get browser event loop for coordinate picker
         """
         self.window = tk.Toplevel(parent)
         self.window.title("Table Coordinates Configuration")
@@ -700,6 +708,7 @@ class TableConfigWindow:
         self.on_save = on_save
         self.browser_opened = browser_opened
         self.browser_page = browser_page
+        self.get_browser_event_loop = get_browser_event_loop
 
         self._create_widgets()
 
@@ -830,10 +839,21 @@ For more help, see INSTALLATION_GUIDE.md
         table_combo.bind("<<ComboboxSelected>>", self._load_table_config)
 
         # Pick button for table region - Put it OUTSIDE region_frame so it's ALWAYS visible!
+        def _on_pick_table_btn_clicked():
+            """Wrapper to debug button click."""
+            print("DEBUG: Button 'Pick Table Region' clicked!")
+            logger.info("DEBUG: Button 'Pick Table Region' clicked!")
+            try:
+                self._pick_table_region()
+            except Exception as e:
+                print(f"DEBUG: Exception in button handler: {e}")
+                logger.error(f"DEBUG: Exception in button handler: {e}", exc_info=True)
+                raise
+        
         pick_table_btn = ttk.Button(
             scrollable_frame,
             text="📐 Pick Table Region",
-            command=self._pick_table_region,
+            command=_on_pick_table_btn_clicked,
             width=50,
         )
         pick_table_btn.grid(row=1, column=0, columnspan=2, pady=(0, 10), padx=10, sticky=(tk.W, tk.E))
@@ -1127,7 +1147,16 @@ For more help, see INSTALLATION_GUIDE.md
 
     def _pick_table_region(self):
         """Pick table region using visual picker."""
+        # DEBUG: Confirm method is being called
+        print("DEBUG: _pick_table_region() called!")
+        logger.info("DEBUG: _pick_table_region() method called")
+        print(f"DEBUG: self.browser_page = {self.browser_page}")
+        print(f"DEBUG: self.browser_page is None? {self.browser_page is None}")
+        
         if not self.browser_page:
+            print("DEBUG: browser_page is None - showing warning")
+            logger.warning("DEBUG: browser_page is None - attempting to show warning dialog")
+            logger.warning("Browser page not available for coordinate picking")
             messagebox.showwarning(
                 "Browser Not Available",
                 "Browser page not available.\n\n"
@@ -1138,6 +1167,8 @@ For more help, see INSTALLATION_GUIDE.md
             )
             return
 
+        logger.info("Browser page available, showing coordinate picker info dialog")
+        
         # Show info message
         self.window.after(0, lambda: messagebox.showinfo(
             "Coordinate Picker",
@@ -1151,28 +1182,75 @@ For more help, see INSTALLATION_GUIDE.md
         ))
 
         def pick_thread():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            """
+            Thread function to run coordinate picker using the original browser event loop.
+            
+            Uses run_coroutine_threadsafe to schedule the coroutine in the browser's
+            event loop instead of creating a new one, which prevents deadlocks with
+            Playwright Page objects.
+            """
+            logger.info("Coordinate picker thread started")
+            
+            # Get the original event loop instead of creating new one
+            original_loop = None
+            if hasattr(self, 'get_browser_event_loop') and callable(self.get_browser_event_loop):
+                original_loop = self.get_browser_event_loop()
+                logger.debug(f"Retrieved browser event loop: {original_loop}")
+            else:
+                logger.warning("get_browser_event_loop method not available or not callable")
+            
+            if not original_loop:
+                logger.error("Browser event loop not available - browser may not be fully initialized")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    "Browser event loop not available. Please ensure browser is fully opened before using coordinate picker."
+                ))
+                return
+            
+            if not self.browser_page:
+                logger.error("Browser page not available")
+                self.window.after(0, lambda: messagebox.showwarning(
+                    "Browser Not Available",
+                    "Browser page not available.\n\n"
+                    "Please:\n"
+                    "1. Click 'Open Browser' in the main window\n"
+                    "2. Navigate to your game page\n"
+                    "3. Then try picking coordinates again"
+                ))
+                return
+            
             try:
-                # Check if page is still valid
-                try:
-                    # Test if page is accessible
-                    loop.run_until_complete(self.browser_page.evaluate("document.title"))
-                except Exception as e:
-                    self.window.after(0, lambda: messagebox.showerror(
-                        "Browser Error",
-                        f"Browser page is not accessible:\n{e}\n\n"
-                        "Please ensure browser is open and on a valid page."
-                    ))
-                    return
-
+                logger.info("Using original event loop for coordinate picker")
+                
+                # Create picker instance
                 picker = CoordinatePicker(self.browser_page)
-                result = loop.run_until_complete(picker.pick_table_region())
+                
+                # Use run_coroutine_threadsafe to run in original loop
+                logger.info("Calling picker.pick_table_region() via run_coroutine_threadsafe")
+                future = asyncio.run_coroutine_threadsafe(
+                    picker.pick_table_region(),
+                    original_loop
+                )
+                
+                # Wait for result (blocking call, but in separate thread)
+                result = future.result(timeout=60.0)  # 60 second timeout
+                
+                logger.info(f"Picker returned result: {result}")
                 
                 if result:
                     self.window.after(0, lambda: self._apply_table_region(result))
                 else:
-                    self.window.after(0, lambda: messagebox.showinfo("Cancelled", "Coordinate picking cancelled"))
+                    self.window.after(0, lambda: messagebox.showinfo(
+                        "Cancelled",
+                        "Coordinate picking cancelled"
+                    ))
+                    
+            except asyncio.TimeoutError:
+                logger.error("Coordinate picking timed out")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Timeout",
+                    "Coordinate picking timed out after 60 seconds."
+                ))
             except Exception as e:
                 import traceback
                 error_msg = f"Failed to pick coordinates:\n{str(e)}\n\n{traceback.format_exc()}"
@@ -1182,8 +1260,6 @@ For more help, see INSTALLATION_GUIDE.md
                     f"Failed to pick coordinates:\n{str(e)}\n\n"
                     "Check logs for details. Make sure browser is open and on a valid page."
                 ))
-            finally:
-                loop.close()
 
         threading.Thread(target=pick_thread, daemon=True).start()
 
@@ -1197,7 +1273,12 @@ For more help, see INSTALLATION_GUIDE.md
         messagebox.showinfo("Success", "Table region captured! Review and save if correct.")
 
     def _pick_button(self, button_type: str):
-        """Pick button position using visual picker."""
+        """
+        Pick button position using visual picker.
+        
+        Args:
+            button_type: Type of button to pick (e.g., 'start', 'stop')
+        """
         if not self.browser_page:
             messagebox.showwarning(
                 "Browser Not Available",
@@ -1206,20 +1287,66 @@ For more help, see INSTALLATION_GUIDE.md
             return
 
         def pick_thread():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            """
+            Thread function to run button coordinate picker using the original browser event loop.
+            """
+            logger.info(f"Button picker thread started for button type: {button_type}")
+            
+            # Get the original event loop instead of creating new one
+            original_loop = None
+            if hasattr(self, 'get_browser_event_loop') and callable(self.get_browser_event_loop):
+                original_loop = self.get_browser_event_loop()
+                logger.debug(f"Retrieved browser event loop: {original_loop}")
+            else:
+                logger.warning("get_browser_event_loop method not available or not callable")
+            
+            if not original_loop:
+                logger.error("Browser event loop not available - browser may not be fully initialized")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    "Browser event loop not available. Please ensure browser is fully opened before using coordinate picker."
+                ))
+                return
+            
             try:
+                # Create picker instance
                 picker = CoordinatePicker(self.browser_page)
-                result = loop.run_until_complete(picker.pick_button_position())
+                
+                # Use run_coroutine_threadsafe to run in original loop
+                logger.info("Calling picker.pick_button_position() via run_coroutine_threadsafe")
+                future = asyncio.run_coroutine_threadsafe(
+                    picker.pick_button_position(),
+                    original_loop
+                )
+                
+                # Wait for result (blocking call, but in separate thread)
+                result = future.result(timeout=60.0)  # 60 second timeout
+                
+                logger.info(f"Button picker returned result: {result}")
                 
                 if result:
                     self.window.after(0, lambda: self._apply_button_position(button_type, result))
                 else:
-                    self.window.after(0, lambda: messagebox.showinfo("Cancelled", "Coordinate picking cancelled"))
+                    self.window.after(0, lambda: messagebox.showinfo(
+                        "Cancelled",
+                        "Coordinate picking cancelled"
+                    ))
+                    
+            except asyncio.TimeoutError:
+                logger.error("Button coordinate picking timed out")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Timeout",
+                    "Coordinate picking timed out after 60 seconds."
+                ))
             except Exception as e:
-                self.window.after(0, lambda: messagebox.showerror("Error", f"Failed to pick coordinates: {e}"))
-            finally:
-                loop.close()
+                import traceback
+                error_msg = f"Failed to pick button coordinates: {str(e)}\n\n{traceback.format_exc()}"
+                logger.error(error_msg)
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    f"Failed to pick coordinates: {str(e)}\n\n"
+                    "Check logs for details. Make sure browser is open and on a valid page."
+                ))
 
         threading.Thread(target=pick_thread, daemon=True).start()
 
@@ -1237,7 +1364,12 @@ For more help, see INSTALLATION_GUIDE.md
             messagebox.showerror("Error", f"Unknown button type: {button_type}")
 
     def _pick_region(self, region_type: str):
-        """Pick region (timer or score) using visual picker."""
+        """
+        Pick region (timer or score) using visual picker.
+        
+        Args:
+            region_type: Type of region to pick ('timer', 'blue_score', or 'red_score')
+        """
         if not self.browser_page:
             messagebox.showwarning(
                 "Browser Not Available",
@@ -1253,23 +1385,91 @@ For more help, see INSTALLATION_GUIDE.md
         mode = mode_map.get(region_type, "score")
 
         def pick_thread():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            """
+            Thread function to run region coordinate picker using the original browser event loop.
+            
+            Uses run_coroutine_threadsafe to schedule the coroutine in the browser's
+            event loop instead of creating a new one, which prevents deadlocks with
+            Playwright Page objects.
+            """
+            logger.info(f"Region picker thread started for region type: {region_type}")
+            
+            # Get the original event loop instead of creating new one
+            original_loop = None
+            if hasattr(self, 'get_browser_event_loop') and callable(self.get_browser_event_loop):
+                original_loop = self.get_browser_event_loop()
+                logger.debug(f"Retrieved browser event loop: {original_loop}")
+            else:
+                logger.warning("get_browser_event_loop method not available or not callable")
+            
+            if not original_loop:
+                logger.error("Browser event loop not available - browser may not be fully initialized")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    "Browser event loop not available. Please ensure browser is fully opened before using coordinate picker."
+                ))
+                return
+            
+            if not self.browser_page:
+                logger.error("Browser page not available")
+                self.window.after(0, lambda: messagebox.showwarning(
+                    "Browser Not Available",
+                    "Browser page not available.\n\n"
+                    "Please:\n"
+                    "1. Click 'Open Browser' in the main window\n"
+                    "2. Navigate to your game page\n"
+                    "3. Then try picking coordinates again"
+                ))
+                return
+            
             try:
+                logger.info(f"Using original event loop for region picker (mode: {mode})")
+                
+                # Create picker instance
                 picker = CoordinatePicker(self.browser_page)
+                
+                # Use run_coroutine_threadsafe to run in original loop
                 if mode == "timer":
-                    result = loop.run_until_complete(picker.pick_timer_region())
+                    logger.info("Calling picker.pick_timer_region() via run_coroutine_threadsafe")
+                    future = asyncio.run_coroutine_threadsafe(
+                        picker.pick_timer_region(),
+                        original_loop
+                    )
                 else:
-                    result = loop.run_until_complete(picker.pick_score_region())
+                    logger.info("Calling picker.pick_score_region() via run_coroutine_threadsafe")
+                    future = asyncio.run_coroutine_threadsafe(
+                        picker.pick_score_region(),
+                        original_loop
+                    )
+                
+                # Wait for result (blocking call, but in separate thread)
+                result = future.result(timeout=60.0)  # 60 second timeout
+                
+                logger.info(f"Region picker returned result: {result}")
                 
                 if result:
                     self.window.after(0, lambda: self._apply_region(region_type, result))
                 else:
-                    self.window.after(0, lambda: messagebox.showinfo("Cancelled", "Coordinate picking cancelled"))
+                    self.window.after(0, lambda: messagebox.showinfo(
+                        "Cancelled",
+                        "Coordinate picking cancelled"
+                    ))
+                    
+            except asyncio.TimeoutError:
+                logger.error("Region coordinate picking timed out")
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Timeout",
+                    "Coordinate picking timed out after 60 seconds."
+                ))
             except Exception as e:
-                self.window.after(0, lambda: messagebox.showerror("Error", f"Failed to pick coordinates: {e}"))
-            finally:
-                loop.close()
+                import traceback
+                error_msg = f"Failed to pick region coordinates: {str(e)}\n\n{traceback.format_exc()}"
+                logger.error(error_msg)
+                self.window.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    f"Failed to pick coordinates: {str(e)}\n\n"
+                    "Check logs for details. Make sure browser is open and on a valid page."
+                ))
 
         threading.Thread(target=pick_thread, daemon=True).start()
 
@@ -1277,8 +1477,8 @@ For more help, see INSTALLATION_GUIDE.md
         """Apply picked region to form."""
         x_key = f"{region_type}_x"
         y_key = f"{region_type}_y"
-        w_key = f"{region_type}_w" if region_type == "timer" else f"{region_type}_w"
-        h_key = f"{region_type}_h" if region_type == "timer" else f"{region_type}_h"
+        w_key = f"{region_type}_w"
+        h_key = f"{region_type}_h"
         
         if x_key in self.coord_vars and y_key in self.coord_vars:
             self.coord_vars[x_key].set(str(result.get("x", 0)))
