@@ -1230,7 +1230,7 @@ So that I can add valid keys and delete keys if payment is not received.
 - 🧪 Story 4.6: Individual Table Pause/Resume Controls
 - 🧪 Story 4.7: Scoreboard Monitoring and Target Score Stop
 - 🧪 Story 4.8: Resource Monitoring Display
-- ⚠️ **Story 4.9: Visual Coordinate Picker** - **ISSUE: Overlay not appearing**
+- ✅ **Story 4.9: Visual Coordinate Picker** - **ISSUE: Overlay not appearing**
 
 
 ---

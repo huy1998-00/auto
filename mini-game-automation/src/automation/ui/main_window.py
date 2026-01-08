@@ -400,6 +400,7 @@ class MainWindow:
         self.browser_status_var.set("Browser: ✓ Opened")
         self.open_browser_button.config(state=tk.NORMAL, text="Browser Opened")
         self.configure_tables_button.config(state=tk.NORMAL)
+        self.start_button.config(state=tk.NORMAL)  # Enable start button after browser opens
         self.log("Browser opened successfully.")
         messagebox.showinfo(
             "Browser Opened",

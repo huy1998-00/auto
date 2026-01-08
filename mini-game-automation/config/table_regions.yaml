@@ -1,70 +1,70 @@
 tables:
   1:
-    x: 62
-    y: 415
-    width: 1783
-    height: 212
+    x: 178
+    y: 336
+    width: 862
+    height: 207
     buttons:
       blue:
-        x: 164
-        y: 764
+        x: 749
+        y: 492
       red:
-        x: 345
-        y: 762
+        x: 963
+        y: 489
       confirm:
-        x: 482
-        y: 749
+        x: 774
+        y: 534
       cancel:
-        x: 604
-        y: 755
+        x: 0
+        y: 0
     timer:
-      x: 698
-      y: 709
-      width: 134
-      height: 84
+      x: 989
+      y: 344
+      width: 40
+      height: 26
     blue_score:
-      x: 678
-      y: 725
-      width: 52
-      height: 77
+      x: 295
+      y: 375
+      width: 44
+      height: 44
     red_score:
-      x: 843
-      y: 704
-      width: 136
-      height: 87
+      x: 520
+      y: 381
+      width: 43
+      height: 36
   2:
-    x: 640
-    y: 0
-    width: 640
-    height: 360
+    x: 181
+    y: 557
+    width: 860
+    height: 201
     buttons:
       blue:
-        x: 150
-        y: 280
+        x: 758
+        y: 709
       red:
-        x: 490
-        y: 280
+        x: 975
+        y: 705
       confirm:
-        x: 320
-        y: 320
+        x: 776
+        y: 758
       cancel:
-        x: 320
-        y: 350
+        x: 732
+        y: 758
     timer:
-      x: 290
-      y: 50
-      width: 60
-      height: 40
+      x: 986
+      y: 560
+      width: 45
+      height: 30
     blue_score:
-      x: 100
-      y: 100
-      width: 80
-      height: 40
+      x: 298
+      y: 605
+      width: 37
+      height: 31
     red_score:
-      x: 460
-      y: 100
-      width: 80
-      height: 40
+      x: 536
+      y: 604
+      width: 46
+      height: 27
   3:
     x: 1280
     y: 0
