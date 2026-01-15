@@ -494,27 +494,31 @@ class AutomationApp:
                 self.ui_window.log("Error: Browser not opened. Please open browser first.")
             return
 
-        # Wait for canvas to be ready (user should have navigated to game page)
-        if self.ui_window:
-            self.ui_window.log("Waiting for canvas element...")
-        
-        if not await self.browser_manager.wait_for_canvas(timeout=30000):
+        # Load configuration early to check table prerequisites
+        self.load_config()
+
+        # Check if tables are configured (required prerequisite)
+        tables_config = self.table_regions_config.get("tables", {})
+        if not tables_config:
             if self.ui_window:
-                self.ui_window.log("Warning: Canvas not found. Make sure you're on the game page.")
-                # Show warning in UI thread
+                self.ui_window.log("Warning: No tables configured. Please configure tables first.")
                 from tkinter import messagebox
                 self.ui_window.root.after(0, lambda: messagebox.showwarning(
-                    "Canvas Not Found",
-                    "Canvas element (#layaCanvas) not found.\n\n"
-                    "Please make sure:\n"
-                    "1. You're logged in\n"
-                    "2. You're on the game page\n"
-                    "3. The game has loaded\n\n"
-                    "Then click 'Start Automation' again."
+                    "No Tables Configured",
+                    "No tables are configured.\n\n"
+                    "Please:\n"
+                    "1. Click 'Configure Tables'\n"
+                    "2. Use visual picker to set table coordinates\n"
+                    "3. Save configuration\n"
+                    "4. Then click 'Start Automation' again"
                 ))
             return
 
-        # Initialize page monitor (now that canvas is ready)
+        # Browser page is available and tables are configured - proceed with automation
+        if self.ui_window:
+            self.ui_window.log("Starting automation...")
+
+        # Initialize page monitor
         if not self.page_monitor:
             self.page_monitor = PageMonitor(self.browser_manager)
             await self.page_monitor.start_monitoring()
@@ -559,32 +563,13 @@ class AutomationApp:
                 error_recovery=error_recovery,
             )
 
-        # Load configuration
-        self.load_config()
-
-        # Add tables from configuration
-        tables_config = self.table_regions_config.get("tables", {})
+        # Add tables from configuration (already validated above)
         tables_added = 0
         for table_id in tables_config.keys():
             if self.add_table_from_config(table_id):
                 tables_added += 1
                 if self.ui_window:
                     self.ui_window.log(f"Added table {table_id}")
-
-        if tables_added == 0:
-            if self.ui_window:
-                self.ui_window.log("Warning: No tables configured. Please configure tables first.")
-                from tkinter import messagebox
-                self.ui_window.root.after(0, lambda: messagebox.showwarning(
-                    "No Tables Configured",
-                    "No tables are configured.\n\n"
-                    "Please:\n"
-                    "1. Click 'Configure Tables'\n"
-                    "2. Use visual picker to set table coordinates\n"
-                    "3. Save configuration\n"
-                    "4. Then click 'Start Automation' again"
-                ))
-            return
 
         # Start all tables
         if self.multi_table_manager:

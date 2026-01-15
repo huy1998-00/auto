@@ -181,6 +181,30 @@ class BrowserManager:
             logger.error(f"Failed to get canvas box: {e}")
             return None
 
+    async def get_canvas_box_with_retry(self, timeout_ms: int = 2000) -> Optional[Dict[str, int]]:
+        """
+        Get canvas box with short retry if not found.
+        
+        Useful for operations that need canvas but can wait briefly.
+        Canvas may appear dynamically after page load.
+        
+        Args:
+            timeout_ms: Maximum wait time in milliseconds (default: 2000ms)
+        
+        Returns:
+            Canvas bounding box dictionary or None if not found after retry
+        """
+        canvas_box = await self.get_canvas_box()
+        if canvas_box:
+            return canvas_box
+        
+        # Canvas not found, wait briefly
+        logger.debug(f"Canvas not found, waiting {timeout_ms}ms...")
+        if await self.wait_for_canvas(timeout=timeout_ms):
+            return await self.get_canvas_box()
+        
+        return None
+
     async def get_original_canvas_box(self) -> Optional[Dict[str, int]]:
         """
         Get the original canvas box stored at initialization.

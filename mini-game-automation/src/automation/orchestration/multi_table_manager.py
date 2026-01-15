@@ -322,8 +322,8 @@ class MultiTableManager:
                     decision = tracker.get_decision()
 
                     if decision and tracker.is_timer_clickable():
-                        # Execute click
-                        canvas_box = await self.browser_manager.get_canvas_box()
+                        # Get canvas box for click execution (with lazy retry)
+                        canvas_box = await self.browser_manager.get_canvas_box_with_retry(timeout_ms=2000)
                         if canvas_box:
                             await self.click_executor.execute_two_phase_click(
                                 table_id=table_id,
@@ -332,6 +332,11 @@ class MultiTableManager:
                                 table_region=config["table_region"],
                                 button_coords=config["button_coords"],
                                 confirm=True,
+                            )
+                        else:
+                            logger.warning(
+                                f"Canvas not available for click on table {table_id}, skipping click",
+                                extra={"table_id": table_id},
                             )
 
             # Send status update to UI

@@ -619,18 +619,18 @@ Enterprise-grade automation tool with advanced analytics, cloud integration, and
 
 **Features:**
 - ✅ Browser automation setup (Playwright, fixed 1920x1080 window)
-- ✅ Region screenshot capture (per-table coordinates)
-- ✅ Timer extraction (OpenCV template matching)
-- ✅ Score extraction (OpenCV template matching)
-- ✅ Round history tracking (last 3 rounds per table)
-- ✅ Learning phase (3 rounds before decisions)
-- ✅ Pattern matching algorithm (priority-based)
-- ✅ Click decision logic (B/P to red/blue mapping)
-- ✅ Timer-based click validation (> 6 check)
-- ✅ Two-phase click execution (team + confirm/cancel with 17px offset)
-- ✅ New round detection (timer reset + score changes)
-- ✅ Winner detection (score comparison)
-- ✅ Adaptive screenshot frequency (multiple strategies)
+- 🧪 Region screenshot capture (per-table coordinates)
+- 🧪 Timer extraction (OpenCV template matching)
+- 🧪 Score extraction (OpenCV template matching)
+- 🧪 Round history tracking (last 3 rounds per table)
+- 🧪 Learning phase (3 rounds before decisions)
+- 🧪 Pattern matching algorithm (priority-based)
+- 🧪 Click decision logic (B/P to red/blue mapping)
+- 🧪 Timer-based click validation (> 6 check)
+- 🧪 Two-phase click execution (team + confirm/cancel with 17px offset)
+- 🧪 New round detection (timer reset + score changes)
+- 🧪 Winner detection (score comparison)
+- 🧪 Adaptive screenshot frequency (multiple strategies)
 
 **Testing Status:** 🧪 Functions implemented but not yet tested/verified
 
@@ -639,12 +639,12 @@ Enterprise-grade automation tool with advanced analytics, cloud integration, and
 **Status:** ✅ Code implemented, 🧪 **NOT YET TESTED**
 
 **Features:**
-- ✅ Multi-table manager (up to 6 tables)
-- ✅ Parallel processing with threading
-- ✅ Region-only screenshots per table
-- ✅ Thread-safe JSON file writing (portalocker)
-- ✅ Independent state per table
-- ✅ Error isolation per table
+- 🧪 Multi-table manager (up to 6 tables)
+- 🧪 Parallel processing with threading
+- 🧪 Region-only screenshots per table
+- 🧪 Thread-safe JSON file writing (portalocker)
+- 🧪 Independent state per table
+- 🧪 Error isolation per table
 
 **Testing Status:** 🧪 Functions implemented but not yet tested/verified
 
@@ -653,11 +653,11 @@ Enterprise-grade automation tool with advanced analytics, cloud integration, and
 **Status:** ✅ Code implemented, 🧪 **NOT YET TESTED**
 
 **Features:**
-- ✅ Date-based session folders (YYYY-MM-DD_HH-MM-SS)
-- ✅ Per-table JSON files (table_1.json through table_6.json)
-- ✅ Session config JSON
-- ✅ In-memory cache system
-- ✅ Continuous writing until tool closes
+- 🧪 Date-based session folders (YYYY-MM-DD_HH-MM-SS)
+- 🧪 Per-table JSON files (table_1.json through table_6.json)
+- 🧪 Session config JSON
+- 🧪 In-memory cache system
+- 🧪 Continuous writing until tool closes
 
 **Testing Status:** 🧪 Functions implemented but not yet tested/verified
 
@@ -670,7 +670,7 @@ Enterprise-grade automation tool with advanced analytics, cloud integration, and
 - ✅ Real-time table status display (500ms updates)
 - ✅ Pattern editor UI with validation
 - ✅ History viewer (last 20-50 rounds)
-- ✅ Global start/stop controls
+- 🧪 Global start/stop controls
 - ✅ Individual pause/resume controls
 - ✅ Resource monitoring (CPU/memory)
 - ✅ Auto-throttling (CPU > 80%)
@@ -695,12 +695,12 @@ Enterprise-grade automation tool with advanced analytics, cloud integration, and
 **Status:** ✅ Code implemented, 🧪 **NOT YET TESTED**
 
 **Features:**
-- ✅ Page refresh detection and auto-resume
-- ✅ Retry logic with exponential backoff (1s, 2s, 4s)
-- ✅ Template matching fallback to OCR (EasyOCR)
-- ✅ Browser window locking (fixed size)
-- ✅ Canvas validation (periodic checks)
-- ✅ Stuck state detection (3 consecutive failures → pause table)
+- 🧪 Page refresh detection and auto-resume
+- 🧪 Retry logic with exponential backoff (1s, 2s, 4s)
+- 🧪 Template matching fallback to OCR (EasyOCR)
+- 🧪 Browser window locking (fixed size)
+- 🧪 Canvas validation (periodic checks)
+- 🧪 Stuck state detection (3 consecutive failures → pause table)
 
 **Testing Status:** 🧪 Functions implemented but not yet tested/verified
 

@@ -59,11 +59,11 @@ class ScreenshotCapture:
             return None
 
         try:
-            # Get canvas bounding box
-            canvas_box = await self.browser_manager.get_canvas_box()
+            # Try to get canvas box (may not exist yet)
+            canvas_box = await self.browser_manager.get_canvas_box_with_retry(timeout_ms=2000)
             if not canvas_box:
                 logger.error(
-                    "Canvas element not found",
+                    "Canvas element not found after retry",
                     extra={"table_id": table_id},
                 )
                 return None
@@ -126,10 +126,13 @@ class ScreenshotCapture:
             return None
 
         try:
-            # Get canvas bounding box
-            canvas_box = await self.browser_manager.get_canvas_box()
+            # Try to get canvas box (may not exist yet)
+            canvas_box = await self.browser_manager.get_canvas_box_with_retry(timeout_ms=2000)
             if not canvas_box:
-                logger.error("Canvas element not found", extra={"table_id": table_id})
+                logger.error(
+                    "Canvas element not found after retry",
+                    extra={"table_id": table_id},
+                )
                 return None
 
             # Calculate absolute subregion coordinates
@@ -176,9 +179,10 @@ class ScreenshotCapture:
             return None
 
         try:
-            canvas_box = await self.browser_manager.get_canvas_box()
+            # Try to get canvas box (may not exist yet)
+            canvas_box = await self.browser_manager.get_canvas_box_with_retry(timeout_ms=2000)
             if not canvas_box:
-                logger.error("Canvas element not found")
+                logger.error("Canvas element not found after retry")
                 return None
 
             screenshot_bytes = await self.browser_manager.page.screenshot(
